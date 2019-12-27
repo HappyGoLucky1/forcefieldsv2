@@ -11,7 +11,7 @@ function PLUGIN:LoadFieldsTwo()
 		ent.AllowedClasses = v.fieldClasses
 		ent:SetDTBool(0, v.fieldEnabled)
 		ent:SetDTBool(1, v.fieldUnionCard)
-		ent:SetDTBool(2, v.fieldLoaded)
+		ent.isLoaded = v.fieldLoaded
 	end
 end
 
@@ -29,7 +29,7 @@ function PLUGIN:SaveFieldsTwo()
 			fieldLoaded = true
 		}
 	end
-
+	print("field saved")
 	Clockwork.kernel:SaveSchemaData("plugins/forcefieldsv2/" .. game.GetMap(), fieldsTwo)
 end
 

@@ -12,6 +12,7 @@ ENT.Spawnable		= false;
 ENT.AdminOnly		= true;
 ENT.RenderGroup 	= RENDERGROUP_BOTH;
 ENT.PhysgunDisabled = true;
+ENT.isLoaded = false
 
 if (SERVER) then
 
@@ -30,7 +31,6 @@ if (SERVER) then
 	function ENT:SetupDataTables()
 		self:DTVar("Bool", 0, "Enabled");
 		self:DTVar("Bool", 1, "UnionCard")
-		self:DTVar("Bool", 2, "Loaded")
 		self:DTVar("Entity", 0, "Dummy");
 	end;
 
@@ -40,7 +40,7 @@ if (SERVER) then
 		self:SetUseType(SIMPLE_USE);
 		self:PhysicsInit(SOLID_VPHYSICS);
 		self:DrawShadow(false);
-		if (!self:GetDTBool(2)) then
+		if (!self.isLoaded) then
 			self:SetDTBool(0, true);
 		end
 
@@ -158,6 +158,10 @@ if (SERVER) then
 	end;
 
 	function ENT:Think()
+		if (!self:GetDTBool(0)) and self.post:GetSkin() == 0 then
+			self.post:SetSkin(1)
+		end
+
 		if (IsValid(self) and self:GetDTBool(0)) then
 			self.ShieldLoop:Play();
 			self.ShieldLoop:ChangeVolume(0.4, 0);
