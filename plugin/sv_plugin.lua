@@ -29,7 +29,7 @@ function PLUGIN:SaveFieldsTwo()
 			fieldLoaded = true
 		}
 	end
-	print("field saved")
+
 	Clockwork.kernel:SaveSchemaData("plugins/forcefieldsv2/" .. game.GetMap(), fieldsTwo)
 end
 
