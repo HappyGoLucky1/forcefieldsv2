@@ -1,4 +1,4 @@
-function PLUGIN:LoadFieldsTwo()
+function cwForceFieldsTwo:LoadFieldsTwo()
 	local fieldsTwo = Clockwork.kernel:RestoreSchemaData("plugins/forcefieldsv2/" .. game.GetMap())
 
 	for k, v in pairs(fieldsTwo) do
@@ -15,7 +15,7 @@ function PLUGIN:LoadFieldsTwo()
 	end
 end
 
-function PLUGIN:SaveFieldsTwo()
+function cwForceFieldsTwo:SaveFieldsTwo()
 	local fieldsTwo = {}
 
 	for k, v in pairs(ents.FindByClass("z_forcefield")) do

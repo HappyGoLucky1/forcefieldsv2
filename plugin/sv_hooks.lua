@@ -1,4 +1,4 @@
-function PLUGIN:KeyPress(player, key)
+function cwForceFieldsTwo:KeyPress(player, key)
 	local data = {};
 	data.start = player:GetShootPos();
 	data.endpos = data.start + player:GetAimVector() * 84;
@@ -11,7 +11,7 @@ function PLUGIN:KeyPress(player, key)
 	end;
 end
 
-function PLUGIN:PlayerInitialSpawn(player)
+function cwForceFieldsTwo:PlayerInitialSpawn(player)
 	if (IsValid(player)) then
 		local forcefields = ents.FindByClass("z_forcefield");
 
@@ -38,11 +38,11 @@ function PLUGIN:PlayerInitialSpawn(player)
 end
 
 -- Called when Clockwork has loaded all of the entities.
-function PLUGIN:ClockworkInitPostEntity()
-	self:LoadFieldsTwo();
+function cwForceFieldsTwo:ClockworkInitPostEntity()
+	cwForceFieldsTwo:LoadFieldsTwo();
 end;
 
 -- Called just after data should be saved.
-function PLUGIN:PostSaveData()
-	self:SaveFieldsTwo();
+function cwForceFieldsTwo:PostSaveData()
+	cwForceFieldsTwo:SaveFieldsTwo();
 end;

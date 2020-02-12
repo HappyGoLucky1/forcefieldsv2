@@ -15,7 +15,6 @@ ENT.PhysgunDisabled = true;
 ENT.isLoaded = false
 
 if (SERVER) then
-
 	function ENT:SpawnFunction(player, trace)
 		if !(trace.Hit) then return; end;
 		local entity = ents.Create("z_forcefield");
@@ -40,6 +39,7 @@ if (SERVER) then
 		self:SetUseType(SIMPLE_USE);
 		self:PhysicsInit(SOLID_VPHYSICS);
 		self:DrawShadow(false);
+
 		if (!self.isLoaded) then
 			self:SetDTBool(0, true);
 		end
@@ -120,15 +120,13 @@ if (SERVER) then
 		if (!self:GetDTBool(0)) then return; end;
 
 		if (ent:IsPlayer()) then
-			if (self:ShouldCollide(ent)) then
-				if (!ent.ShieldTouch) then
-					ent.ShieldTouch = CreateSound(ent, "ambient/machines/combine_shield_touch_loop1.wav");
-					ent.ShieldTouch:Play();
-					ent.ShieldTouch:ChangeVolume(0.25, 0);
-				else
-					ent.ShieldTouch:Play();
-					ent.ShieldTouch:ChangeVolume(0.25, 0.5);
-				end;
+			if (!ent.ShieldTouch) then
+				ent.ShieldTouch = CreateSound(ent, "ambient/machines/combine_shield_touch_loop1.wav");
+				ent.ShieldTouch:Play();
+				ent.ShieldTouch:ChangeVolume(0.25, 0);
+			else
+				ent.ShieldTouch:Play();
+				ent.ShieldTouch:ChangeVolume(0.25, 0.5);
 			end;
 		end;
 	end;
@@ -137,10 +135,8 @@ if (SERVER) then
 		if (!self:GetDTBool(0)) then return; end;
 
 		if (ent:IsPlayer()) then
-			if (self:ShouldCollide(ent)) then
-				if ent.ShieldTouch then
-					ent.ShieldTouch:ChangeVolume(0.3, 0);
-				end;
+			if ent.ShieldTouch then
+				ent.ShieldTouch:ChangeVolume(0.3, 0);
 			end;
 		end;
 	end;
@@ -149,10 +145,8 @@ if (SERVER) then
 		if (!self:GetDTBool(0)) then return; end;
 
 		if (ent:IsPlayer()) then
-			if (self:ShouldCollide(ent)) then
-				if (ent.ShieldTouch) then
-					ent.ShieldTouch:FadeOut(0.5);
-				end;
+			if (ent.ShieldTouch) then
+				ent.ShieldTouch:FadeOut(0.5);
 			end;
 		end;
 	end;
@@ -195,7 +189,9 @@ if (SERVER) then
 
 				return;
 			end;
+		end
 
+		if (Schema:PlayerIsCombine(act) and self.AllowedClasses[Clockwork.class:FindByID(act:Team())["name"]]) then
 			self:SetDTBool(0, !self:GetDTBool(0));
 
 			if (!self:GetDTBool(0)) then
@@ -243,15 +239,13 @@ if (SERVER) then
 			netstream.Start(nil, "forcefieldUpdate", "fullUpdate", {self, self.AllowedClasses});
 		end;
 	end;
-end;
-
-if (CLIENT) then
-
+else
 	function ENT:Initialize()
 		local data = {};
 		data.start = self:GetPos() + Vector(0, 0, 50) + self:GetRight() * -16;
 		data.endpos = self:GetPos() + Vector(0, 0, 50) + self:GetRight() * -600;
 		data.filter = self;
+
 		local trace = util.TraceLine(data);
 
 		local verts = {
@@ -304,36 +298,88 @@ if (CLIENT) then
 			local matFac = 45;
 			local height = 5;
 			local frac = dist / matFac;
+
 			mesh.Begin(MATERIAL_QUADS, 1);
-			mesh.Position(vector_origin);
-			mesh.TexCoord(0, 0, 0);
-			mesh.AdvanceVertex();
-			mesh.Position(self:GetUp() * 190);
-			mesh.TexCoord(0, 0, height);
-			mesh.AdvanceVertex();
-			mesh.Position(vertex + self:GetUp() * 190);
-			mesh.TexCoord(0, frac, height);
-			mesh.AdvanceVertex();
-			mesh.Position(vertex);
-			mesh.TexCoord(0, frac, 0);
-			mesh.AdvanceVertex();
+				mesh.Position(vector_origin);
+				mesh.TexCoord(0, 0, 0);
+				mesh.AdvanceVertex();
+
+				mesh.Position(self:GetUp() * 190);
+				mesh.TexCoord(0, 0, height);
+				mesh.AdvanceVertex();
+
+				mesh.Position(vertex + self:GetUp() * 190);
+				mesh.TexCoord(0, frac, height);
+				mesh.AdvanceVertex();
+
+				mesh.Position(vertex);
+				mesh.TexCoord(0, frac, 0);
+				mesh.AdvanceVertex();
 			mesh.End();
 		end;
 	end;
 end;
 
-function ENT:ShouldCollide(ent)
-	if (!self:GetDTBool(0)) then return false; end;
+hook.Add("ShouldCollide", "forcefieldShouldCollide", function(ent1, ent2)
+	local projectiles = {};
 
-	if (ent:IsPlayer()) then
-		if (self.AllowedClasses and self.AllowedClasses[Clockwork.class:FindByID(ent:Team())["name"]]) then
-			return false;
-		elseif (self:GetDTBool(1) and ent:HasItemByID("union_card")) then
-			return false;
-		else
-			return true;
-		end;
-	else
-		return true;
+	projectiles["crossbow_bolt"]		 	= true;
+	projectiles["grenade_ar2"]			 	= true;
+	projectiles["hunter_flechette"]	 		= true;
+	projectiles["npc_clawscanner"]		 	= true;
+	projectiles["npc_combine_camera"]	 	= true;
+	projectiles["npc_combine_s"]		 	= true;
+	projectiles["npc_combinedropship"]	 	= true;
+	projectiles["npc_combinegunship"]	 	= true;
+	projectiles["npc_cscanner"]		 		= true;
+	projectiles["npc_grenade_frag"]			= true;
+	projectiles["npc_helicopter"]		 	= true;
+	projectiles["npc_hunter"]			 	= true;
+	projectiles["npc_manhack"]			 	= true;
+	projectiles["npc_metropolice"]		 	= true;
+	projectiles["npc_rollermine"]		 	= true;
+	projectiles["npc_stalker"]			 	= true;
+	projectiles["npc_strider"]			 	= true;
+	projectiles["npc_tripmine"]		 		= true;
+	projectiles["npc_turret_ceiling"]	 	= true;
+	projectiles["npc_turret_floor"] 	 	= true;
+	projectiles["prop_combine_ball"]		= true;
+	projectiles["prop_physics"]		 		= true;
+	projectiles["prop_vehicle_zapc"]	 	= true;
+	projectiles["rpg_missile"]			 	= true;
+
+	local player
+	local entity
+
+	if (ent1:IsPlayer()) then
+		player = ent1;
+		entity = ent2;
+	elseif (ent2:IsPlayer()) then
+		player = ent2;
+		entity = ent1;
+	elseif (projectiles[ent1:GetClass()] and ent2:GetClass() == "z_forcefield") then
+		return false;
+	elseif (projectiles[ent2:GetClass()] and ent1:GetClass() == "z_forcefield") then
+		return false;
 	end;
-end;
+
+	if (IsValid(entity) and entity:GetClass() == "z_forcefield") then
+		if (IsValid(player)) then
+			if (!entity:GetDTBool(0)) then
+				return false;
+			end;
+
+			if (entity.AllowedClasses and entity.AllowedClasses[Clockwork.class:FindByID(player:Team())["name"]]) then
+				return false;
+			elseif (entity:GetDTBool(1)) then
+				if SERVER and player:HasItemByID("union_card") then
+					return false
+				end
+			else
+				return true;
+			end;
+		else
+			return entity:GetDTBool(0);
+		end;
+	end;
+end)

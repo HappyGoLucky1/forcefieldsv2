@@ -1,5 +1,7 @@
 local PLUGIN = PLUGIN
 
+PLUGIN:SetGlobalAlias("cwForceFieldsTwo")
+
 if (!netstream) then
 	include("libraries/sh_netstream.lua")
 	AddCSLuaFile("libraries/sh_netstream.lua")
